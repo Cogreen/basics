@@ -1,0 +1,317 @@
+
+ㅁsqlite
+
+  ㅇ별도의 db서버가 필요 없이 db파일 기초하여 데이터베이스 처리하는 엔진
+  
+import sqlite3
+
+conn = sqlite3.connect(":memory:")  #메모리에다가 db를 구성할 수 있도록
+c = conn.cursor()   #그 메모리영역을 사용할 수 있도록(메모리포인터지정)
+
+c.execute("create table emp1(id integer, name text, sal integer)")  #데이터를 저장하기 위해서 테이블 구성
+c.execute("insert into emp1(id,name,sal) values(1,'홍길동',1000)")
+c.execute("select * from emp1")
+c.fetchone()    #한 행 fetch
+c.execute("insert into emp1(id,name,sal) values(2,'박찬호',2000)")
+c.execute("select * from emp1")
+c.fetchone()
+c.fetchone()
+
+c.execute("select * from emp1")
+c.fetchall()    #모든 행 fetch
+
+conn.rollback()
+c.execute("select * from emp1")
+c.fetchall()
+
+c.execute("insert into emp1(id,name,sal) values(1,'홍길동',1000)")
+c.execute("insert into emp1(id,name,sal) values(2,'박찬호',2000)")
+conn.commit()
+c.execute("select * from emp1")
+c.fetchall()
+c.close()   #커서 닫고
+conn.close()    #connect(메모리)도 닫는다.
+
+conn = sqlite3.connect(":memory:")
+c = conn.cursor() 
+c.execute("select * from emp1") #Error : emp1이 사라졌다.
+c.close()
+conn.close()
+
+#emp1 테이블을 파이썬이 끝나더라도 계속 사용하고 싶으면 connect 할 때 파일에 떨어뜨릴 수 있도록 하면 된다.
+conn = sqlite3.connect("c:/data/insa.db")
+c = conn.cursor()
+c.execute("create table emp1(id integer, name text, sal integer)")
+c.execute("insert into emp1(id,name,sal) values(1,'홍길동',1000)")
+c.execute("insert into emp1(id,name,sal) values(2,'박찬호',2000)")
+c.execute("select * from emp1")
+c.fetchall()
+conn.commit()
+c.close()
+conn.close()
+#c:/data 안에 insa.db파일이 만들어진걸 확인할 수 있다.
+conn = sqlite3.connect("c:/data/insa.db")
+c = conn.cursor()
+c.execute("select name from sqlite_master where type = 'table'")
+c.fetchall()
+c.execute("PRAGMA table_info(emp1)")
+c.fetchall()
+
+c.execute("insert into emp1(id,name,sal) values(?,?,?)",(3,'나얼',3000))
+c.execute("select * from emp1")
+c.fetchone()
+
+inser_sql = "insert into emp1(id,name,sal) values(?,?,?)"
+c.execute(inser_sql,(4,'윤건',4000))
+c.execute("select * from emp1")
+c.fetchall()
+conn.commit()
+c.execute("select * from emp1")
+c.fetchmany(2)
+
+c.execute("update emp1 set sal = 6000 where id = 1")
+c.execute("select * from emp1 where id = 1")
+c.fetchall()
+conn.rollback()
+c.execute("select * from emp1 where id = 1")
+c.fetchall()    #update하기 이전값을 확인할 수 있다.
+ 
+c.execute("delete from emp1 where id = 2")
+c.execute("select * from emp1")
+c.fetchall()
+conn.rollback()
+c.execute("select * from emp1")
+c.fetchall()
+
+c.execute("alter table emp1 add column deptno integer")
+c.execute("PRAGMA table_info(emp1)")
+c.fetchall()
+
+c.execute("drop table emp1")
+c.execute("create table emp(id integer, name text, sal integer, deptno integer)")
+c.execute("insert into emp(id,name, sal, deptno) values(1,'홍길동',1000,10)")
+c.execute("insert into emp(id,name, sal, deptno) values(2,'박찬호',2000,20)")
+c.execute("insert into emp(id,name, sal, deptno) values(3,'나얼',3000,30)")
+c.execute("insert into emp(id,name, sal, deptno) values(4,'윤건',4000,40)")
+conn.commit()
+c.execute("select * from emp")
+c.fetchall()
+c.execute("create table dept(deptno integer, dname text)")
+c.execute("insert into dept(deptno,dname) values(10,'총무부')")
+c.execute("insert into dept(deptno,dname) values(20,'영업1')")
+c.execute("insert into dept(deptno,dname) values(30,'영업2')")
+c.execute("insert into dept(deptno,dname) values(40,'분석팀')")
+conn.commit()
+c.execute("select * from dept")
+c.fetchall()
+
+c.execute("insert into emp(id,name,sal,deptno) values(5,'김건모',5000,null)")
+c.execute("insert into dept(deptno,dname) values(50,'인사팀')")
+conn.commit()
+c.execute("select * from emp")
+c.fetchall()
+c.execute("select * from dept")
+c.fetchall()
+
+c.execute("""select emp.id, emp.name, emp.deptno, dept.dname
+          from emp inner join dept
+          on emp.deptno = dept.deptno""")
+c.fetchall()
+
+c.execute("""select emp.id, emp.name, emp.deptno, dept.dname
+          from emp left outer join dept
+          on emp.deptno = dept.deptno""")
+c.fetchall()
+
+c.execute("""select emp.id, emp.name, emp.deptno, dept.dname
+          from emp right outer join dept
+          on emp.deptno = dept.deptno""")
+c.fetchall()
+#Error : right outer join, full outer join 은 아직 제공되지 않음
+
+c.execute("""select emp.id, emp.name, emp.deptno, dept.dname
+          from dept left outer join emp
+          on emp.deptno = dept.deptno""")
+c.fetchall()
+#right outer join은 위치만 바꿔주면 된다.
+
+c.execute("""select emp.id, emp.name, emp.deptno, dept.dname
+          from emp left outer join dept
+          on emp.deptno = dept.deptno
+          union
+          select emp.id, emp.name, emp.deptno, dept.dname
+          from dept left outer join emp
+          on emp.deptno = dept.deptno""")
+c.fetchall()
+#full outer join은 두 개의 select 문을 합쳐주면 된다.
+
+c.execute("""select emp.id, emp.name, emp.deptno, dept.dname
+          from emp left outer join dept
+          on emp.deptno = dept.deptno
+          union all
+          select emp.id, emp.name, emp.deptno, dept.dname
+          from dept left outer join emp
+          on emp.deptno = dept.deptno""")
+c.fetchall()
+
+c.execute("""select emp.id, emp.name, emp.deptno, dept.dname
+          from emp left outer join dept
+          on emp.deptno = dept.deptno
+          intersect
+          select emp.id, emp.name, emp.deptno, dept.dname
+          from dept left outer join emp
+          on emp.deptno = dept.deptno""")
+c.fetchall()
+
+c.execute("""select emp.id, emp.name, emp.deptno, dept.dname
+          from emp left outer join dept
+          on emp.deptno = dept.deptno
+          except
+          select emp.id, emp.name, emp.deptno, dept.dname
+          from dept left outer join emp
+          on emp.deptno = dept.deptno""")
+c.fetchall()
+#minus는 없고 except 사용
+
+c.close()
+conn.close()
+
+conn = sqlite3.connect("c:/data/phonebook.db")
+c = conn.cursor()
+c.execute("create table phonebook(name text, pn text)")
+c.execute("insert into phonebook(name,pn) values('홍길동','010-1234-5678')")
+
+def dataGenerator():
+    datalist={('윤건','010-7777-8888'),('나얼','010-1004-1004')}
+    for i in datalist:
+        yield i
+        
+c.executemany("insert into phonebook(name,pn) values(?,?)",dataGenerator())
+c.execute("select * from phonebook")
+c.fetchall()
+
+conn.rollback()
+c.close()
+conn.close()
+
+lst = [x*x for x in range(5)]
+for i in lst:
+    print(i)
+lst
+#메모리에 lst를 만들어 놓고 사용한다.(데이터량이 많으면 메모리를 비효율적으로 사용할 수 있다.)
+
+lst = (x*x for x in range(5))
+for i in lst:
+    print(i)
+lst
+#generator object : 
+#메모리에 lst를 만들어 놓지 않고 호출(yield)할 때 만들어진다.
+
+#list는 list 안에 속한 데이터를 메모리에 적재하기 때문에 list 크기만큼 메모리 사이즈가 늘어나게 된다.
+#generator의 경우는 데이터 값을 한꺼번에 메모리에 적재하는 것이 아니라 next()메소드를 통해 차례로 값에 접근할 때마다 메모리에 적재하는 방식이다.
+
+def gen():
+    yield 1
+    yield 2
+    yield 3
+
+g = gen()
+print (next(g))
+print (next(g))
+print (next(g))
+print (next(g))
+
+#http://www.sqlite.org/lang_corefunc.html
+
+conn = sqlite3.connect("c:/data/insa.db")
+c = conn.cursor()
+
+import pandas as pd
+from pandas import Series, DataFrame
+
+data = {'id':[1,2,3,4],'name':['홍길동','박찬호','이병헌','김태리'],'sal':[1000,2000,3000,4000]}
+df = DataFrame(data)
+df
+
+df.to_sql('test',conn,index=False)
+c = conn.cursor()
+c.execute('select * from test')
+c.fetchall()
+
+data = pd.read_csv("c:/data/emp_new.csv",names=['empid','name','job','hire_dat','sal','comm','deptno'])
+data.to_sql('emp_new',conn,index=False)
+
+df_new = pd.read_sql_query("select * from emp_new",conn)
+df_new
+
+data = pd.read_csv("c:/data/emp_new.csv",names=['empid','name','job','hire_dat','sal','comm','deptno'])
+data.to_sql('emp',conn,index=False)
+
+c.execute("select avg(sal) from emp")
+c.fetchall()
+c.execute("select count(*),count(deptno) from emp")
+c.fetchall()
+c.execute("select deptno,max(sal),min(sal) from emp group by deptno")
+c.fetchall()
+c.execute("select sum(sal),total(sal) from emp")
+c.fetchall()
+c.execute("select deptno, job from emp group by deptno,job")
+c.fetchall()
+c.execute("select deptno,group_concat(job) from emp group by deptno")
+c.fetchall()
+c.execute("select deptno,group_concat(distinct job) from emp group by deptno")
+c.fetchall()
+#https://www.sqlite.org/lang.html
+
+#Anaconda Prompt에서 수행
+#python -m pip install cx_Oracle --upgrade
+
+import cx_Oracle
+dsn = cx_Oracle.makedsn("localhost",1521,"XE")  #아이피주소,포트,접속해야할 db서버의 인스턴스이름
+db = cx_Oracle.connect("hr","hr",dsn)
+cursor = db.cursor()
+
+cursor.execute("select * from employees")
+row = cursor.fetchone()
+row
+
+row = cursor.fetchmany()
+row
+cursor.rowcount     #전체건수가 아닌 페치된 건수
+
+cn = 0
+for i in cursor.execute("select * from employees"):
+    cn += 1
+    print(i)
+
+print(cn)
+cursor.close()
+
+import cx_Oracle
+import csv
+con = cx_Oracle.connect('hr/hr@localhost/xe')
+cursor = con.cursor()
+csv_file = open("c:/data/emp_20180927.csv","w")
+writer = csv.writer(csv_file, delimiter = ',')
+for row in cursor.execute("select * from employees"):
+    writer.writerow(row)
+    
+cursor.close()
+con.close()
+csv_file.close()
+
+con = cx_Oracle.connect('hr/hr@localhost/xe')
+cursor = con.cursor()
+csv_file = open("c:/data/emp_20180927.csv","w")
+writer = csv.writer(csv_file, delimiter = ',')
+col = []
+for i in cursor.execute("select column_name from user_tab_cols where table_name = 'EMPLOYEES'"):
+    print(i)
+    col.append(''.join(i))
+writer.writerow(col)
+for row in cursor.execute("select * from employees"):
+    writer.writerow(row)
+    
+cursor.close()
+con.close()
+csv_file.close()

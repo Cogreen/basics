@@ -1,0 +1,129 @@
+
+cd /home/hadoop/hadoop-2.7.2/etc/hadoop
+
+[hadoop@dataserver hadoop]$ vi hadoop-env.sh
+export JAVA_HOME=/usr/jdk1.7.0_80
+export HADOOP_PID_DIR=/home/hadoop/hadoop-2.7.2/pids
+
+[hadoop@dataserver hadoop]$ vi masters
+192.168.56.110
+[hadoop@dataserver hadoop]$ vi slaves
+192.168.56.110
+
+[hadoop@dataserver hadoop]$ vi core-site.xml 
+
+<configuration>
+ <property>
+  <name>fs.defaultFS</name>
+  <value>hdfs://dataserver:9010</value>
+ </property>
+</configuration>
+
+
+[hadoop@dataserver hadoop]$ vi hdfs-site.xml 
+
+<configuration>
+ <property>
+  <name>dfs.replication</name>
+  <value>1</value>
+ </property>
+ <property>
+  <name>dfs.namenode.name.dir</name>
+  <value>/home/hadoop/data/dfs/namenode</value>
+ </property>
+ <property>
+  <name>dfs.namenode.checkpoint.dir</name>
+  <value>/home/hadoop/data/dfs/namesecondary</value>
+ </property>
+ <property>
+  <name>dfs.datanode.data.dir</name>
+  <value>/home/hadoop/data/dfs/datanode</value>
+ </property>
+ <property>
+  <name>dfs.http.address</name>
+  <value>dataserver:50070</value>
+ </property>
+ <property>
+  <name>dfs.secondary.http.address</name>
+  <value>dataserver:50090</value>
+ </property>
+</configuration>
+
+
+[hadoop@dataserver hadoop]$ vi mapred-site.xml
+
+<configuration>
+ <property>
+  <name>mapreduce.framework.name</name>
+  <value>yarn</value>
+ </property>
+</configuration>
+
+[hadoop@dataserver hadoop]$ vi yarn-site.xml 
+
+<configuration>
+ <property>
+  <name>yarn.nodemanager.aux-services</name>
+  <value>mapreduce_shuffle</value>
+ </property>
+ <property>
+  <name>yarn.nodemanager.aux-services.mapreduce_suffle.class</name>
+  <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+ </property>
+ <property>
+  <name>yarn.nodemanager.local-dirs</name>
+  <value>/home/hadoop/data/yarn/nm-local-dir</value>
+ </property>
+ <property>
+  <name>yarn.resourcemanager.fs.state-store.uri</name>
+  <value>/home/hadoop/data/yarn/system/rmstore</value>
+ </property>
+ <property>
+  <name>yarn.resourcemanager.hostname</name>
+  <value>dataserver</value>
+ </property>
+ <property>
+  <name>yarn.web-proxy.address</name>
+  <value>0.0.0.0:8089</value>
+ </property>
+</configuration>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

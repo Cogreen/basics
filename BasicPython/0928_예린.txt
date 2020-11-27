@@ -1,0 +1,239 @@
+ㅁ웹크롤링
+
+#Anaconda Prompt에서...
+#pip install beutifulsoup4
+
+from bs4 import BeautifulSoup
+html = """
+<html>
+    <body>
+        <h1> 스크래핑 </h1>
+            <p> 웝페이지 분석하기 </p>
+            <p> 데이터 정제작업하기1 </p>
+            <p> 데이터 정제작업하기2 </p>
+    </body>
+</html>
+"""
+
+soup = BeautifulSoup(html,"html.parser")
+soup
+
+#원하는 태그 내용을 가져오기
+h1 = soup.html.body.h1
+h1
+
+h1.string   #.string : 태그는 다 제거하고 문자만 보여준다.
+
+p1 = soup.html.body.p
+p1.string   #첫 번째 <p>가 출력된다.
+#두 번째 <p>를 출력하기
+p2 = p1.next_sibling.next_sibling
+p2
+p3 = p1.next_sibling.next_sibling.next_sibling.next_sibling
+p3
+
+html = """
+<html>
+    <body>
+        <h1 id='title'> beautifulsoup </h1>
+            <p id='subtitle'> 스크래핑 </p>
+            <p> 데이터 추출하기 </p>
+    </body>
+</html>
+"""
+
+soup = BeautifulSoup(html,'html.parser')
+
+soup.find(id='title').string
+title = soup.find(id='title')
+title.string
+
+soup.find(id='subtitle').string
+
+html = """
+<html>
+    <body>
+        <ul>
+            <li> <a href="http://www.itwill.com"> 아이티윌 </a> </li>
+            <li> <a href="http://www.naver.com"> 네이버 </a> </li>
+        </ul>
+    </body>
+</html>
+"""
+
+soup = BeautifulSoup(html,'html.parser')
+
+a1 = soup.html.body.ul.li.a
+a1.string
+
+a2 = a1.next_sibling.next_sibling
+a2.string
+#Error : 
+
+soup.find('a').string   #find는 무조건 첫 번째 것만 찾아진다.
+soup.find_all('a')  #find_all 
+soup.find_all('a').string #Error
+
+a = soup.a #soup.find('a')랑 똑같다.
+a.attrs    #a 안에있는 href을 보여준다.
+'href' in a.attrs
+a['href']
+a.attrs['href']
+
+link = soup.find_all('a')
+for i in link:
+    print(i.attrs['href'])
+    print(i.string)
+
+################################################################
+#메모장에서 a.html utf-8 로 'c:/data/'에 저장
+<html>
+	<head>
+		<title> 나의 홈페이지 </title>
+	</head>
+
+	<body>
+		<p align = 'center'> 환영합니다. </p>
+		<p align = 'left'> 이름 : 홍길동 <br> 나이 : 25 <br> 취미 : 놀기 </p>
+		<p align = 'right'> 오늘 하루도 행복하세요...</p>
+		<a href = 'http://itwill.co.kr' class='cafe1' id='link1'> 아이티윌 </a>
+		<a href = 'http://www.naver.com' class='cafe2' id='link2'> 네이버 </a>
+		<a href = 'http://www.google.com' class='cafe3' id='link3'> 구글 </a>
+	</body>
+</html>
+################################################################
+
+with open("c:/data/a.html",encoding='UTF8') as html:
+    soup=BeautifulSoup(html,'html.parser')
+
+soup.find('title').string
+soup.find('body')
+p = soup.find_all('p')
+p
+
+for i in p:
+    print(i.string)
+    
+for i in p:
+    print(i.get_text())
+    
+p = soup.findAll('p')   #.findAll : .find_all 이랑 같은 기능
+for i in p:
+    print(i.get_text())
+    
+soup.find('body')
+soup.find('body').string    #아무것도 안보여진다.
+soup.find('body').get_text()
+soup.find('body').get_text(strip=True)  #strip=True : \n 제거
+
+body = soup.find('body')
+for i in body:
+    print(i.string) #<br> 안나온다.
+    
+for i in body:
+    print(i.get_text()) #안된다.
+    
+body = soup.findAll('body') #body 태그는 하나밖에 없지만
+for i in body:
+    print(i.get_text())
+    
+soup.find('a')
+
+a = soup.find('a')
+for i in a:
+    print(i.get_text())
+
+a = soup.findAll('a')
+for i in a:
+    print(i.get_text())
+    
+link = soup.find_all('a')
+for i in link:
+    print(i.attrs['href'])
+    print(i.string)
+    
+link = soup.findAll('a')
+for i in link:
+    print(i.attrs['href'])
+    print(i.string)
+    
+a1 = soup.findAll('a',{'class':'cafe1'})
+for i in a1:
+    print(i.get_text())
+    
+a2 = soup.findAll('a',{'class':'cafe2'})
+for i in a2:
+    print(i.attrs['href'])
+    print(i.get_text())
+#두번째 태크
+    
+a1 = soup.findAll('a',{'id':'link1'})
+for i in a1:
+    print(i.attrs['href'])
+    print(i.get_text())
+
+a2 = soup.findAll('a',{'id':'link2'})
+for i in a1:
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+for i in soup.findAll('a',{'id':'link3'}):
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+for i in soup.findAll(class='cafe1'):
+    print(i.attrs['href'])
+    print(i.get_text())
+#SyntaxError
+for i in soup.findAll(class='cafe2'):
+    print(i.attrs['href'])
+    print(i.get_text())
+#SyntaxError 
+for i in soup.findAll(class='cafe3'):
+    print(i.attrs['href'])
+    print(i.get_text())
+#SyntaxError
+    
+for i in soup.findAll(class_='cafe1'):
+    print(i.attrs['href'])
+    print(i.get_text())
+
+for i in soup.findAll(class_='cafe2'):
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+for i in soup.findAll(class_='cafe3'):
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+for i in soup.findAll(id='link1'):
+    print(i.attrs['href'])
+    print(i.get_text())
+
+for i in soup.findAll(id='link2'):
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+for i in soup.findAll(id='link3'):
+    print(i.attrs['href'])
+    print(i.get_text())
+
+for i in soup.findAll('a'):
+    print(i.get('href'))
+
+soup.findAll(['a','p'])
+
+for i in soup.findAll(['a','p']):
+    print(i.get_text())
+    
+#http://www.weather.go.kr/weather/forecast/mid-term-rss3.jsp
+    
+import urllib.request as req
+
+url = "http://www.weather.go.kr/weather/forecast/mid-term-rss3.jsp"
+res = req.urlopen(url)
+res
+
+soup = BeautifulSoup(res,'html.parser')
+soup.find('title').string
+soup.find('wf').string

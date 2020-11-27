@@ -1,0 +1,912 @@
+20180927
+
+
+# sqlite
+- 별도의 db서버가 필요없이 db파일을 기초하여 데이터베이스 처리하는 엔진
+- https://www.sqlite.org/index.html 참고하기
+  Documentation - Programming Interfaces - SQL Syntax
+
+
+import sqlite3
+
+conn=sqlite3.connect(":memory:")		메모리에다가 db를 구성
+
+c=conn.cursor()					conn에 cursor 생성
+
+c.execute("create table emp1(id integer, name text, sal integer)")	create table 테이블명(컬럼이름1 타입, 컬럼이름2 타입)
+Out[5]: <sqlite3.Cursor at 0x8f99c00>
+
+c.execute("insert into emp1(id,name,sal) values(1,'권아름',1000)")	",' 구분해서 다른것 사용하기
+Out[6]: <sqlite3.Cursor at 0x8f99c00>
+
+c.execute("select * from emp1")					메모리 주소만 보임
+Out[10]: <sqlite3.Cursor at 0x8f99c00>
+
+c.fetchone()							fetchone() : 한 줄씩 보기
+Out[11]: (1, '권아름', 1000)
+
+c.fetchone()							더 이상 값이 없음
+
+c.execute("insert into emp1(id,name,sal) values(2,'박찬호',2000)")
+Out[13]: <sqlite3.Cursor at 0x8f99c00>
+
+c.execute("select * from emp1")
+Out[14]: <sqlite3.Cursor at 0x8f99c00>
+
+c.fetchone()
+Out[15]: (1, '권아름', 1000)
+
+c.fetchone()
+Out[16]: (2, '박찬호', 2000)
+
+c.fetchone()						더이상 값이 없음
+
+c.execute("select * from emp1")
+Out[18]: <sqlite3.Cursor at 0x8f99c00>
+
+c.fetchall()						fetchall() : 모든 값 보기
+Out[19]: [(1, '권아름', 1000), (2, '박찬호', 2000)]
+
+conn.rollback()						rollback() : 영구히 저장되는것이 아니라서 rollback수행시 사라짐
+
+c.execute("select * from emp1")
+Out[22]: <sqlite3.Cursor at 0x8f99c00>
+
+c.fetchall()
+Out[23]: []
+
+c.execute("insert into emp1(id,name,sal) values(1,'권아름',1000)")
+Out[24]: <sqlite3.Cursor at 0x8f99c00>
+
+c.execute("insert into emp1(id,name,sal) values(2,'박찬호',2000)")
+Out[25]: <sqlite3.Cursor at 0x8f99c00>
+
+conn.commit()						commit() : 영구저장
+
+c.execute("select * from emp1")
+Out[27]: <sqlite3.Cursor at 0x8f99c00>
+
+c.fetchall()
+Out[28]: [(1, '권아름', 1000), (2, '박찬호', 2000)]
+
+c.close()				커서닫기
+
+conn.close()				connect(메모리)닫기
+
+
+conn=sqlite3.connect(":memory:")
+
+c=conn.cursor()
+
+c.execute("select * from emp1")					커서와 메모리를 close했기 때문에 안의 내용(table) 사라짐
+Traceback (most recent call last):
+
+  File "<ipython-input-33-ed0ea3ff6d97>", line 1, in <module>
+    c.execute("select * from emp1")
+
+OperationalError: no such table: emp1
+
+c.fetchall()
+Out[34]: []
+
+c.close()
+
+conn.close()
+
+
+conn=sqlite3.connect("c:/data/insa.db")			파일로 떨어뜨리면 close한 이후에도 계속사용 가능
+
+c=conn.cursor()
+
+c.execute("create table emp1(id integer, name text, sal integer)")
+Out[39]: <sqlite3.Cursor at 0x8f99f10>
+
+c.execute("insert into emp1(id,name,sal) values(1,'권아름',1000)")
+Out[40]: <sqlite3.Cursor at 0x8f99f10>
+
+c.execute("insert into emp1(id,name,sal) values(2,'박찬호',2000)")
+Out[81]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("select * from emp1")
+Out[41]: <sqlite3.Cursor at 0x8f99f10>
+
+c.fetchone()
+Out[42]: (1, '권아름', 1000)
+
+conn.commit()
+
+c.close()
+
+conn.close()
+
+
+conn=sqlite3.connect("c:/data/insa.db")
+
+c=conn.cursor()
+
+c.execute("select name from sqlite_master where type='table'")		내가 만든 테이블 보기
+Out[49]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[50]: [('emp1',)]
+
+c.execute("PRAGMA table_info(emp1)")					PRAGMA table_info(테이블명) : 테이블의 정보 확인 (sql에서 desc)
+Out[51]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[52]: 
+[(0, 'id', 'integer', 0, None, 0),
+ (1, 'name', 'text', 0, None, 0),
+ (2, 'sal', 'integer', 0, None, 0)]
+
+c.execute("insert into emp1(id,name,sal) values(?,?,?)",(3,'나얼',3000))		values를 ?,?,?로 두고 후에 입력값 처리
+Out[53]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("select * from emp1")
+Out[58]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[59]: [(1, '권아름', 1000), (2, '박찬호', 2000), (3, '나얼', 3000)]
+
+
+insert_sql="insert into emp1(id,name,sal) values(?,?,?)"			입력값 처리
+
+c.execute(insert_sql,(4,'윤건',4000))
+Out[61]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("select * from emp1")
+Out[62]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[63]: [(1, '권아름', 1000), (2, '박찬호', 2000), (3, '나얼', 3000), (4, '윤건', 4000)]
+
+conn.commit()
+
+
+c.execute("select * from emp1")
+Out[65]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchmany(4)								fetchmany(4) : 4개만 보기
+Out[66]: [(1, '권아름', 1000), (2, '박찬호', 2000), (3, '나얼', 3000), (4, '윤건', 4000)]
+
+c.execute("update emp1 set sal=6000 where id=1")
+Out[67]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("select * from emp1 where id=1")
+Out[68]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchone()
+Out[69]: (1, '권아름', 6000)
+
+conn.rollback()
+
+c.execute("select * from emp1 where id=1")
+Out[71]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchone()
+Out[72]: (1, '권아름', 1000)
+
+c.execute("delete from emp1 where id=2")
+Out[75]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("select * from emp1")
+Out[79]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[80]: [(1, '권아름', 1000), (3, '나얼', 3000), (4, '윤건', 4000)]
+
+c.execute("alter table emp1 add column deptno integer")				컬럼추가
+Out[90]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[94]: 
+[(0, 'id', 'integer', 0, None, 0),
+ (1, 'name', 'text', 0, None, 0),
+ (2, 'sal', 'integer', 0, None, 0),
+ (3, 'deptno', 'integer', 0, None, 0)]
+
+c.execute("select * from emp1")
+Out[95]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[96]: [(1, '권아름', 1000, None), (3, '나얼', 3000, None), (4, '윤건', 4000, None)]
+
+c.execute("drop table emp1")
+Out[97]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("create table emp(id integer,name text,sal integer,deptno integer)")
+Out[100]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into emp(id,name,sal,deptno) values(1,'홍길동',1000,10)")
+Out[101]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into emp(id,name,sal,deptno) values(2,'박찬호',2000,20)")
+Out[102]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into emp(id,name,sal,deptno) values(3,'나얼',3000,30)")
+Out[103]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into emp(id,name,sal,deptno) values(4,'윤건',4000,40)")
+Out[104]: <sqlite3.Cursor at 0x9241260>
+
+conn.commit()
+
+c.execute("select * from emp")
+Out[106]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[107]: 
+[(1, '홍길동', 1000, 10),
+ (2, '박찬호', 2000, 20),
+ (3, '나얼', 3000, 30),
+ (4, '윤건', 4000, 40)]
+
+c.execute("create table dept(deptno integer, dname text)")
+Out[111]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into dept(deptno,dname) values(10,'총무부')")
+Out[112]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into dept(deptno,dname) values(20,'영업1')")
+Out[113]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into dept(deptno,dname) values(30,'영업2')")
+Out[114]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into dept(deptno,dname) values(40,'분석팀')")
+Out[115]: <sqlite3.Cursor at 0x9241260>
+
+conn.commit()
+
+c.execute("select * from dept")
+Out[117]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[118]: [(10, '총무부'), (20, '영업1'), (30, '영업2'), (40, '분석팀')]
+
+
+c.execute("insert into emp(id,name,sal,deptno) values(5,'김건모',5000,null)")
+Out[120]: <sqlite3.Cursor at 0x9241260>
+
+c.execute("insert into dept(deptno,dname) values(50,'인사팀')")
+Out[121]: <sqlite3.Cursor at 0x9241260>
+
+conn.commit()
+
+c.execute("select * from emp")
+Out[123]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[124]: 
+[(1, '홍길동', 1000, 10),
+ (2, '박찬호', 2000, 20),
+ (3, '나얼', 3000, 30),
+ (4, '윤건', 4000, 40),
+ (5, '김건모', 5000, None)]
+
+c.execute("select * from dept")
+Out[125]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[126]: [(10, '총무부'), (20, '영업1'), (30, '영업2'), (40, '분석팀'), (50, '인사팀')]
+
+
+c.execute("select emp.id,emp.name,emp.deptno,dept.dname from emp inner join dept on emp.deptno=dept.deptno")		join은 ANSI표준으로 지원함
+Out[127]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[128]: 
+[(1, '홍길동', 10, '총무부'),
+ (2, '박찬호', 20, '영업1'),
+ (3, '나얼', 30, '영업2'),
+ (4, '윤건', 40, '분석팀')]				emp.deptno가 null인 김건모는 출력되지 않음
+
+c.execute("select emp.id,emp.name,emp.deptno,dept.dname
+from emp inner join dept
+on emp.deptno=dept.deptno")
+  File "<ipython-input-131-fac993b2ee0d>", line 1
+    c.execute("select emp.id,emp.name,emp.deptno,dept.dname
+                                                           ^
+SyntaxError: EOL while scanning string literal
+
+c.execute("""select emp.id,emp.name,emp.deptno,dept.dname		줄바꿈해서 쓸 경우 """ 써주기
+from emp inner join dept
+on emp.deptno=dept.deptno""")
+Out[129]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[130]: 
+[(1, '홍길동', 10, '총무부'),
+ (2, '박찬호', 20, '영업1'),
+ (3, '나얼', 30, '영업2'),
+ (4, '윤건', 40, '분석팀')]
+
+c.execute("""select emp.id,emp.name,emp.deptno,dept.dname
+from emp left outer join dept
+on emp.deptno=dept.deptno""")
+Out[132]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[133]: 
+[(1, '홍길동', 10, '총무부'),
+ (2, '박찬호', 20, '영업1'),
+ (3, '나얼', 30, '영업2'),
+ (4, '윤건', 40, '분석팀'),
+ (5, '김건모', None, None)]
+
+c.execute("""select emp.id,emp.name,emp.deptno,dept.dname
+from emp right outer join dept
+on emp.deptno=dept.deptno""")
+Traceback (most recent call last):
+
+  File "<ipython-input-134-559b13ac2ebb>", line 3, in <module>
+    on emp.deptno=dept.deptno""")
+
+OperationalError: RIGHT and FULL OUTER JOINs are not currently supported	right outer join은 지원하지 않음, 오른쪽/왼쪽 바꿔서 join 해야함
+
+c.execute("""select emp.id,emp.name,emp.deptno,dept.dname
+from dept left outer join emp
+on emp.deptno=dept.deptno""")
+Out[135]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[136]: 
+[(1, '홍길동', 10, '총무부'),
+ (2, '박찬호', 20, '영업1'),
+ (3, '나얼', 30, '영업2'),
+ (4, '윤건', 40, '분석팀'),
+ (None, None, None, '인사팀')]
+
+c.execute("""select emp.id,emp.name,emp.deptno,dept.dname
+from emp left outer join dept
+on emp.deptno=dept.deptno
+union									left outer join과 union을 이용해서 full outet join 하기
+select emp.id,emp.name,emp.deptno,dept.dname				union은 중복되는 값 제거
+from dept left outer join emp
+on emp.deptno=dept.deptno""")
+Out[137]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[138]: 
+[(None, None, None, '인사팀'),
+ (1, '홍길동', 10, '총무부'),
+ (2, '박찬호', 20, '영업1'),
+ (3, '나얼', 30, '영업2'),
+ (4, '윤건', 40, '분석팀'),
+ (5, '김건모', None, None)]
+
+c.execute("""select emp.id,emp.name,emp.deptno,dept.dname
+from emp left outer join dept
+on emp.deptno=dept.deptno
+union all								union all은 중복되는 값 제거하지 않음
+select emp.id,emp.name,emp.deptno,dept.dname
+from dept left outer join emp
+on emp.deptno=dept.deptno""")
+Out[139]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[140]: 
+[(1, '홍길동', 10, '총무부'),
+ (2, '박찬호', 20, '영업1'),
+ (3, '나얼', 30, '영업2'),
+ (4, '윤건', 40, '분석팀'),
+ (5, '김건모', None, None),
+ (1, '홍길동', 10, '총무부'),
+ (2, '박찬호', 20, '영업1'),
+ (3, '나얼', 30, '영업2'),
+ (4, '윤건', 40, '분석팀'),
+ (None, None, None, '인사팀')]
+
+c.execute("""select emp.id,emp.name,emp.deptno,dept.dname
+from emp left outer join dept
+on emp.deptno=dept.deptno
+intersect								intersect 교집합
+select emp.id,emp.name,emp.deptno,dept.dname
+from dept left outer join emp
+on emp.deptno=dept.deptno""")
+Out[141]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[142]: 
+[(1, '홍길동', 10, '총무부'),
+ (2, '박찬호', 20, '영업1'),
+ (3, '나얼', 30, '영업2'),
+ (4, '윤건', 40, '분석팀')]
+
+c.execute("""select emp.id,emp.name,emp.deptno,dept.dname
+from emp left outer join dept
+on emp.deptno=dept.deptno
+except									except 차집합
+select emp.id,emp.name,emp.deptno,dept.dname
+from dept left outer join emp
+on emp.deptno=dept.deptno""")
+Out[143]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[144]: [(5, '김건모', None, None)]
+
+c.execute("select * from emp where sal=(select sal from emp where deptno=30)")		서브쿼리
+Out[145]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[146]: [(3, '나얼', 3000, 30)]
+
+c.execute("select * from emp where sal>(select sal from emp where deptno=20)")
+Out[147]: <sqlite3.Cursor at 0x9241260>
+
+c.fetchall()
+Out[148]: [(3, '나얼', 3000, 30), (4, '윤건', 4000, 40), (5, '김건모', 5000, None)]
+
+c.close()
+
+conn.close()
+
+
+
+conn=sqlite3.connect("c:/data/phonebook.db")
+
+c=conn.cursor()
+
+c.execute("create table phonebook(name text, pn text)")
+Out[154]: <sqlite3.Cursor at 0x761a0a0>
+
+c.execute("insert into phonebook(name,pn) values('홍길동','010-1234-5678')")			한 개씩 insert하기 번거로우니 함수를 만들자
+Out[156]: <sqlite3.Cursor at 0x761a0a0>
+
+def dataGenerator():
+    datalist={('윤건','010-7777-8888'),('나얼','010-1004-1004')}
+    for i in datalist:
+        yield i										yield : return값 쓰는것 처럼 쓰는것
+        
+c.executemany("insert into phonebook(name,pn) values(?,?)", dataGenerator())		executemany : 한 번에 여러건 insert 처리
+Out[158]: <sqlite3.Cursor at 0x761a0a0>
+
+c.execute("select * from phonebook")
+Out[159]: <sqlite3.Cursor at 0x761a0a0>
+
+c.fetchall()
+Out[160]: [('홍길동', '010-1234-5678'), ('윤건', '010-7777-8888'), ('나얼', '010-1004-1004')]
+
+conn.commit()
+
+c.close()
+
+conn.close()
+
+
+
+# Generator
+- list는 list 안에 속한 데이터를 메모리에 적재하기 때문에 list크기 만큼 메모리 사이즈가 늘어나게 됨
+- generator의 경우는 데이터 값을 한꺼번에 메모리에 적재하는 것이 아니라
+  next()메소드를 통해 차례로 값에 접근할 때마다 메모리에 적재하는 방식
+
+lst=[x*x for x in range(5)]			리스트내장객체, 메모리에 값을 미리 만들어 놓고 사용, 데이터의 양이 커지면 메모리의 사용이 비효율적
+
+for i in lst:
+    print(i)
+    
+0
+1
+4
+9
+16
+
+lst
+Out[168]: [0, 1, 4, 9, 16]
+
+lst=(x*x for x in range(5))			Generator 방식, 값을 미리 만들어 놓지 않음, 호출할 때 만들어서 사용
+
+for i in lst:
+    print(i)
+    
+0
+1
+4
+9
+16
+
+lst
+Out[170]: <generator object <genexpr> at 0x0000000007635308>
+
+
+def gen():
+    yield 1
+    yield 2
+    yield 3
+    
+g=gen()
+
+print(next(g))
+1
+
+print(next(g))
+2
+
+print(next(g))
+3
+
+print(next(g))
+Traceback (most recent call last):
+
+  File "<ipython-input-176-1dfb29d6357e>", line 1, in <module>
+    print(next(g))
+
+StopIteration
+
+
+
+conn=sqlite3.connect("c:/data/insa.db")
+
+c=conn.cursor()					지금은 안해도됨
+
+import pandas as pd
+
+from pandas import Series,DataFrame
+
+data={'id':[1,2,3,4],'name':['권아름','박찬호','이병헌','김태리'],'sal':[1000,2000,3000,4000]}
+
+df=DataFrame(data)
+
+df
+Out[189]: 
+   id name   sal
+0   1  권아름  1000
+1   2  박찬호  2000
+2   3  이병헌  3000
+3   4  김태리  4000
+
+df.to_sql('test',conn,index=False)		connect를 통해서 df의 내용으로 test table을 생성하되 index는 표시하지않음
+
+c=conn.cursor()
+
+c.execute('select * from test')
+Out[192]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[193]: [(1, '권아름', 1000), (2, '박찬호', 2000), (3, '이병헌', 3000), (4, '김태리', 4000)]
+
+data=pd.read_csv("c:/data/emp_new.csv",names=['empid','name','job','mgr','hire_date','sal','comm','deptno'])
+
+data.to_sql('emp_new',conn,index=False)
+
+c.execute('select * from emp_new')
+Out[196]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[197]: 
+[(100, 'King', 'AD_PRES', None, '2003-06-17', 24000.0, None, 90.0),
+ (101, 'Kochhar', 'AD_VP', 100.0, '2005-09-21', 17000.0, None, 90.0),
+ (102, 'De Haan', 'AD_VP', 100.0, '2001-01-13', 17000.0, None, 90.0),
+ (103, 'Hunold', 'IT_PROG', 102.0, '2006-01-03', 9000.0, None, 60.0),
+ (104, 'Ernst', 'IT_PROG', 103.0, '2007-05-21', 6000.0, None, 60.0),
+...........
+
+
+df_new=pd.read_sql_query("select * from test",conn)			query문의 결과를 conn를 통해 df_new로 읽어들이기
+
+df_new
+Out[199]: 
+   id name   sal
+0   1  권아름  1000
+1   2  박찬호  2000
+2   3  이병헌  3000
+3   4  김태리  4000
+
+
+c.execute('select * from emp_new where comm is not null')
+Out[203]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[204]: 
+[(145, 'Russell', 'SA_MAN', 100.0, '2004-10-01', 14000.0, 0.4, 80.0),
+ (146, 'Partners', 'SA_MAN', 100.0, '2005-01-05', 13500.0, 0.3, 80.0),
+ (147, 'Errazuriz', 'SA_MAN', 100.0, '2005-03-10', 12000.0, 0.3, 80.0),
+ (148, 'Cambrault', 'SA_MAN', 100.0, '2007-10-15', 11000.0, 0.3, 80.0),
+...........
+
+c.execute('select * from emp_new order by sal')
+Out[212]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[213]: 
+[(132, 'Olson', 'ST_CLERK', 121.0, '2007-04-10', 2100.0, None, 50.0),
+ (128, 'Markle', 'ST_CLERK', 120.0, '2008-03-08', 2200.0, None, 50.0),
+ (136, 'Philtanker', 'ST_CLERK', 122.0, '2008-02-06', 2200.0, None, 50.0),
+ (127, 'Landry', 'ST_CLERK', 120.0, '2007-01-14', 2400.0, None, 50.0),
+...........
+
+c.execute('select deptno,sum(sal) from emp_new group by deptno')
+Out[216]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[217]: 
+[(None, 7000.0),
+ (10.0, 4400.0),
+ (20.0, 19000.0),
+ (30.0, 24900.0),
+ (40.0, 6500.0),
+ (50.0, 156400.0),
+ (60.0, 28800.0),
+ (70.0, 10000.0),
+ (80.0, 304500.0),
+ (90.0, 58000.0),
+ (100.0, 53708.8),
+ (110.0, 20308.0)]
+
+c.execute('select deptno,avg(sal) from emp_new group by deptno')
+Out[219]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[220]: 
+[(None, 7000.0),
+ (10.0, 4400.0),
+ (20.0, 9500.0),
+ (30.0, 4150.0),
+ (40.0, 6500.0),
+ (50.0, 3475.5555555555557),
+ (60.0, 5760.0),
+ (70.0, 10000.0),
+ (80.0, 8955.882352941177),
+ (90.0, 19333.333333333332),
+ (100.0, 8951.466666666667),
+ (110.0, 10154.0)]
+
+c.execute('select deptno,count(*),count(deptno) from emp_new group by deptno')				count()안에 컬럼명을 쓰면 null제외	
+Out[223]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[224]: 
+[(None, 1, 0),
+ (10.0, 1, 1),
+ (20.0, 2, 2),
+ (30.0, 6, 6),
+ (40.0, 1, 1),
+ (50.0, 45, 45),
+ (60.0, 5, 5),
+ (70.0, 1, 1),
+ (80.0, 34, 34),
+ (90.0, 3, 3),
+ (100.0, 6, 6),
+ (110.0, 2, 2)]
+
+c.execute('select max(sal),min(sal) from emp_new')
+Out[236]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[237]: [(24000.0, 2100.0)]
+
+c.execute('select deptno,max(sal),min(sal) from emp_new group by deptno')
+Out[246]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[247]: 
+[(None, 7000.0, 7000.0),
+ (10.0, 4400.0, 4400.0),
+ (20.0, 13000.0, 6000.0),
+ (30.0, 11000.0, 2500.0),
+ (40.0, 6500.0, 6500.0),
+ (50.0, 8200.0, 2100.0),
+ (60.0, 9000.0, 4200.0),
+ (70.0, 10000.0, 10000.0),
+ (80.0, 14000.0, 6100.0),
+ (90.0, 24000.0, 17000.0),
+ (100.0, 13208.8, 6900.0),
+ (110.0, 12008.0, 8300.0)]
+
+c.execute('select sum(sal),total(sal) from emp_new')
+Out[240]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[241]: [(693516.8, 693516.8)]
+
+c.execute('select deptno,job from emp_new group by deptno,job')
+Out[244]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[245]: 
+[(None, 'SA_REP'),
+ (10.0, 'AD_ASST'),
+ (20.0, 'MK_MAN'),
+ (20.0, 'MK_REP'),
+ (30.0, 'PU_CLERK'),
+ (30.0, 'PU_MAN'),
+ (40.0, 'HR_REP'),
+ (50.0, 'SH_CLERK'),
+ (50.0, 'ST_CLERK'),
+ (50.0, 'ST_MAN'),
+ (60.0, 'IT_PROG'),
+ (70.0, 'PR_REP'),
+ (80.0, 'SA_MAN'),
+ (80.0, 'SA_REP'),
+ (90.0, 'AD_PRES'),
+ (90.0, 'AD_VP'),
+ (100.0, 'FI_ACCOUNT'),
+ (100.0, 'FI_MGR'),
+ (110.0, 'AC_ACCOUNT'),
+ (110.0, 'AC_MGR')]
+
+c.execute('select deptno,group_concat(job) from emp_new group by deptno')			deptno를 기준으로 group으로 묶되 job을 연결해서 출력
+Out[242]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[243]: 
+[(None, 'SA_REP'),
+ (10.0, 'AD_ASST'),
+ (20.0, 'MK_MAN,MK_REP'),
+ (30.0, 'PU_MAN,PU_CLERK,PU_CLERK,PU_CLERK,PU_CLERK,PU_CLERK'),
+ (40.0, 'HR_REP'),
+ (50.0,
+  'ST_MAN,ST_MAN,ST_MAN,ST_MAN,ST_MAN,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,ST_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK,SH_CLERK'),
+ (60.0, 'IT_PROG,IT_PROG,IT_PROG,IT_PROG,IT_PROG'),
+ (70.0, 'PR_REP'),
+ (80.0,
+  'SA_MAN,SA_MAN,SA_MAN,SA_MAN,SA_MAN,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP,SA_REP'),
+ (90.0, 'AD_PRES,AD_VP,AD_VP'),
+ (100.0, 'FI_MGR,FI_ACCOUNT,FI_ACCOUNT,FI_ACCOUNT,FI_ACCOUNT,FI_ACCOUNT'),
+ (110.0, 'AC_MGR,AC_ACCOUNT')]
+
+c.execute('select deptno,group_concat(distinct job) from emp_new group by deptno')		deptno를 기준으로 group으로 묶되 job을 중복을 제거하고 연결해서 출력
+Out[234]: <sqlite3.Cursor at 0x761a1f0>
+
+c.fetchall()
+Out[235]: 
+[(None, 'SA_REP'),
+ (10.0, 'AD_ASST'),
+ (20.0, 'MK_MAN,MK_REP'),
+ (30.0, 'PU_MAN,PU_CLERK'),
+ (40.0, 'HR_REP'),
+ (50.0, 'ST_MAN,ST_CLERK,SH_CLERK'),
+ (60.0, 'IT_PROG'),
+ (70.0, 'PR_REP'),
+ (80.0, 'SA_MAN,SA_REP'),
+ (90.0, 'AD_PRES,AD_VP'),
+ (100.0, 'FI_MGR,FI_ACCOUNT'),
+ (110.0, 'AC_MGR,AC_ACCOUNT')]
+
+
+
+# PYTHON에서 ORACLE 접속하기
+
+1. 
+# Anaconda Prompt창에서 수행
+python -m pip install cx_Oracle --upgrade
+
+# Spyder
+import cx_Oracle
+
+dsn=cx_Oracle.makedsn("localhost",1521,"XE")			cx_Oracle.makedsn(db서버의 ip주소, 포트, SID) : db 연동 객체 생성
+
+db=cx_Oracle.connect("hr","hr",dsn)
+
+cursor=db.cursor()						
+
+cursor.execute("select * from employees")
+<cx_Oracle.Cursor on <cx_Oracle.Connection to hr@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=XE)))>>
+
+row=cursor.fetchone()
+
+row
+Out[256]: 
+(100,
+ 'Steven',
+ 'King',
+ 'SKING',
+ '515.123.4567',
+ datetime.datetime(2003, 6, 17, 0, 0),
+ 'AD_PRES',
+ 31944.0,
+ None,
+ None,
+ 90)
+
+row=cursor.fetchmany()
+
+row
+....
+ (199,
+  'Douglas',
+  'Grant',
+  'DGRANT',
+  '650.507.9844',
+  datetime.datetime(2008, 1, 13, 0, 0),
+  'SH_CLERK',
+  2600.0,
+  None,
+  124,
+  50),
+ (200,
+  'Jennifer',
+  'Whalen',
+  'JWHALEN',
+  '515.123.4444',
+  datetime.datetime(2003, 9, 17, 0, 0),
+  'AD_ASST',
+  5324.0,
+  None,
+  101,
+  10)]
+
+cursor.rowcount				fetch한 row의 수 (한번에 최대 100개 fetch)
+Out[259]: 101				101 = 1 + 100
+
+row=cursor.fetchmany()
+
+cursor.rowcount
+Out[277]: 107
+
+cn=0
+
+for i in cursor.execute("select * from employees"):
+	cn+=1
+	print(i)
+ 
+(100, 'Steven', 'King', 'SKING', '515.123.4567', datetime.datetime(2003, 6, 17, 0, 0), 'AD_PRES', 31944.0, None, None, 90)
+(101, 'Neena', 'Kochhar', 'NKOCHHAR', '515.123.4568', datetime.datetime(2005, 9, 21, 0, 0), 'AD_VP', 18700.0, None, 100, 90)
+(102, 'Lex', 'De Haan', 'LDEHAAN', '515.123.4569', datetime.datetime(2001, 1, 13, 0, 0), 'AD_VP', 17000.0, None, 100, 90)
+....
+
+cn
+Out[269]: 107
+
+
+2.
+import csv
+
+con=cx_Oracle.connect('hr/hr@localhost/xe')
+
+cursor=con.cursor()
+
+csv_file=open("c:/data/emp-20180927.csv","w")
+
+writer=csv.writer(csv_file,delimiter=',')
+
+for row in cursor.execute("select * from employees"):		select 문장 결과만 write하는 거라서 컬럼이름은 안써짐
+    writer.writerow(row)
+    
+cursor.close()
+
+con.close()
+
+csv_file.close()
+
+
+
+# 컬럼이름 작성하기
+import csv
+
+con=cx_Oracle.connect('hr/hr@localhost/xe')
+
+cursor=con.cursor()
+
+csv_file=open("c:/data/emp-20180927.csv","w")
+
+writer=csv.writer(csv_file,delimiter=',')
+
+col=[]
+
+for i in cursor.execute("select column_name from user_tab_cols where table_name='EMPLOYEES'"):
+    print(i)
+    col.append(''.join(i))
+
+('EMPLOYEE_ID',)
+('FIRST_NAME',)
+('LAST_NAME',)
+('EMAIL',)
+('PHONE_NUMBER',)
+('HIRE_DATE',)
+('JOB_ID',)
+('SALARY',)
+('COMMISSION_PCT',)
+('MANAGER_ID',)
+('DEPARTMENT_ID',)
+
+writer.writerow(col)						컬럼이름 write
+
+for row in cursor.execute("select * from employees"):		select 문장 결과 write
+    writer.writerow(row)
+
+cursor.close()
+
+con.close()
+
+csv_file.close()

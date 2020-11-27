@@ -1,0 +1,487 @@
+20180928
+
+
+# Anaconda Prompt에서
+pip install beautifulsoup4
+
+
+# Spyder에서
+from bs4 import BeautifulSoup
+
+html="""
+<html>								html은 트리형식
+	<body>
+		<h1> 스크래핑 </h1>
+			<p> 웹페이지 분석하기 </p>
+			<p> 데이터 정제작업하기 </p>
+ 			<p> 데이터 정제작업하기2 </p>
+	</body>
+</html>
+"""
+
+soup=BeautifulSoup(html,"html.parser")		parser라는 분석기를 돌려야함
+
+soup
+Out[6]: 
+
+<html>
+<body>
+<h1> 스크래핑 </h1>
+<p> 웹페이지 분석하기 </p>
+<p> 데이터 정제작업하기 </p>
+</body>
+</html>
+
+
+# 원하는 태그 내용을 가져오기
+h1=soup.html.body.h1				h1 내용을 긁어오기
+
+h1
+Out[9]: <h1> 스크래핑 </h1>
+
+h1.string					변수.string : 태그는 제거하고 문자만 출력
+Out[10]: ' 스크래핑 '
+
+p1=soup.html.body.p				첫번째 p 내용을 긁어오기
+
+p1.string
+Out[13]: ' 웹페이지 분석하기 '
+
+p2=p1.next_sibling				태그와 태그 사이에는 \n이 내부적으로 있음
+						따라서 두번째 태그 내용을 보고싶으면 next_sibling 두번해야 함
+p2.string
+Out[21]: '\n'					
+
+p2=p1.next_sibling.next_sibling			첫번째.next_sibling.next_sibling : 두번째 p 내용을 긁어오기
+										   p2는 p1의 형제
+p2.string
+Out[19]: ' 데이터 정제작업하기 '
+
+p3=p2.next_sibling.next_sibling			세번째 p 내용 긁어오기, 두번째 p를 기준으로 next_sibling.next_sibling
+
+p3.string
+Out[33]: ' 데이터 정제작업하기2 '
+
+
+html="""
+<html>
+<body>
+<h1 id='title'> beautifulsoup </h1>			id라는 속성을 부여
+<p id='subtitle'> 스크래핑 </p>
+<p> 데이터 추출하기 </p>
+</body>
+</html>
+"""
+
+soup=BeautifulSoup(html,"html.parser")
+
+soup.find(id='title').string
+Out[56]: ' beautifulsoup '
+
+title=soup.find(id='title')
+
+title.string
+Out[58]: ' beautifulsoup '
+
+soup.find(id='subtitle').string
+Out[59]: ' 스크래핑 '
+
+
+html="""
+<html>
+	<body>
+		<ul>
+			<li> <a href="http://www.itwill.com"> 아이티윌 </a> </li>		링크를 생성하는 태그
+			<li> <a href="http://www.naver.com"> 네이버 </a> </li>
+	</body>
+</html>
+"""
+
+soup=BeautifulSoup(html,"html.parser")
+
+a1=soup.html.body.ul.li.a
+
+a1.string
+Out[49]: ' 아이티윌 '
+
+soup.find('a')							find : 해당 태그의 첫번째 것만 찾아줌
+Out[63]: <a href="http://www.itwill.com"> 아이티윌 </a>
+
+soup.find('a').string
+Out[64]: ' 아이티윌 '
+
+soup.find_all('a')						find_all : 해당 태그의 모든 내용을 찾아줌
+Out[65]: 
+[<a href="http://www.itwill.com"> 아이티윌 </a>,
+ <a href="http://www.naver.com"> 네이버 </a>]
+
+a=soup.a
+
+a								첫번째 것만 보여줌
+Out[72]: <a href="http://www.itwill.com"> 아이티윌 </a>
+
+a.attrs								a안의 속성의 값을 보여줌
+Out[70]: {'href': 'http://www.itwill.com'}
+
+'href' in a.attrs						href라는 key가 a.attrs에 존재하는가
+Out[71]: True
+
+a['href']							href의 values만 보기
+Out[75]: 'http://www.itwill.com'
+
+a.attrs['href']
+Out[76]: 'http://www.itwill.com'
+
+
+link=soup.find_all('a')						find_all을 통해 'a'속성의 값을 출력하면 list 형태이므로 string이 바로 안됨
+
+link
+Out[79]: 
+[<a href="http://www.itwill.com"> 아이티윌 </a>,
+ <a href="http://www.naver.com"> 네이버 </a>]
+
+for i in link:
+    print(i.attrs['href'])
+    print(i.string)
+    
+http://www.itwill.com
+ 아이티윌 
+http://www.naver.com
+ 네이버 
+
+for i in link:
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+http://itwill.co.kr
+ 아이티윌 
+http://www.naver.com
+ 네이버 
+
+link=soup.findAll('a')
+
+for i in link:
+    print(i.attrs['href'])
+    print(i.string)
+    
+http://itwill.co.kr
+ 아이티윌 
+http://www.naver.com
+ 네이버 
+
+for i in link:
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+http://itwill.co.kr
+ 아이티윌 
+http://www.naver.com
+ 네이버
+
+
+
+<html>
+<head>
+	<title> 나의 홈페이지 </title>
+</head>
+	
+<body>
+<p align ='center'> 환영합니다 </p>
+<p align ='left'> 이름 : 권아름 <br> 나이 : 25 <br> 취미 : 음악감상 </p>
+<p align ='right'> 오늘 하루도 행복하세요...</p>
+<a href = 'http://itwill.co.kr' class='cafe1' id='link1'> 아이티윌 </a>
+<a href = 'http://www.naver.com' class='cafe2' id='link2'> 네이버 </a>
+<a href = 'http://www.google.com' class='cafe3' id='link3'> 구글 </a>
+</body>
+</html>
+
+위의 내용을 c:/data에 a.html로 저장 (파일형식 : 모든파일, 인코딩 : UTF-8)
+
+
+with open("c:/data/a.html",encoding='UTF8') as html:				a.html파일을 불러와서 분석하기
+    soup=BeautifulSoup(html,'html.parser')
+  
+soup.find('title').string
+Out[91]: ' 나의 홈페이지 '
+
+soup.find('body')
+Out[92]: 
+<body>
+<p align="center"> 환영합니다 </p>
+<p align="left"> 이름 : 권아름 <br/> 나이 : 25 <br/> 취미 : 음악감상 </p>
+<p align="right"> 오늘 하루도 행복하세요...</p>
+<a class="cafe1" href="http://itwill.co.kr" id="link1"> 아이티윌 </a>
+<a class="cafe2" href="http://www.naver.com" id="link2"> 네이버 </a>
+<a class="cafe3" href="http://www.google.com" id="link3"> 구글 </a>
+</body>
+
+p=soup.find_all('p')
+
+p
+Out[95]: 
+[<p align="center"> 환영합니다 </p>,
+ <p align="left"> 이름 : 권아름 <br/> 나이 : 25 <br/> 취미 : 음악감상 </p>,
+ <p align="right"> 오늘 하루도 행복하세요...</p>]
+
+for i in p:
+    print(i.string)
+    
+ 환영합니다 
+None						p라는 태그안에 글자열을 변경하는 태그가 사용된 경우 None으로 출력
+ 오늘 하루도 행복하세요...
+
+for i in p:
+    print(i.get_text())				get_text() : text를 모두 출력
+    
+ 환영합니다 
+ 이름 : 권아름  나이 : 25  취미 : 음악감상 
+ 오늘 하루도 행복하세요...
+
+p=soup.findAll('p')
+
+for i in p:
+    print(i.get_text())
+    
+ 환영합니다 
+ 이름 : 권아름  나이 : 25  취미 : 음악감상 
+ 오늘 하루도 행복하세요...
+
+soup.find('body')
+Out[104]: 
+<body>
+<p align="center"> 환영합니다 </p>
+<p align="left"> 이름 : 권아름 <br/> 나이 : 25 <br/> 취미 : 음악감상 </p>
+<p align="right"> 오늘 하루도 행복하세요...</p>
+<a class="cafe1" href="http://itwill.co.kr" id="link1"> 아이티윌 </a>
+<a class="cafe2" href="http://www.naver.com" id="link2"> 네이버 </a>
+<a class="cafe3" href="http://www.google.com" id="link3"> 구글 </a>
+</body>
+
+soup.find('body').string			아무것도 안나옴
+
+soup.find('body').get_text()			\n으로 구분되서 text 출력
+Out[106]: '\n 환영합니다 \n 이름 : 권아름  나이 : 25  취미 : 음악감상 \n 오늘 하루도 행복하세요...\n 아이티윌 \n 네이버 \n 구글 \n'
+
+soup.find('body').get_text(strip=True)		모두 붙여서 출력
+Out[107]: '환영합니다이름 : 권아름나이 : 25취미 : 음악감상오늘 하루도 행복하세요...아이티윌네이버구글'
+
+body=soup.find('body')
+
+for i in body:
+    print(i.string)
+    
+ 환영합니다 
+
+
+None
+
+
+ 오늘 하루도 행복하세요...
+
+
+ 아이티윌 
+
+
+ 네이버 
+
+
+ 구글 
+
+for i in body:
+    print(i.get_text())							get_text()는 find_all / findAll에서만 되는 메소드
+AttributeError: 'NavigableString' object has no attribute 'get_text'
+
+body=soup.find_all('body')
+
+for i in body:
+    print(i.get_text())
+    
+
+ 환영합니다 
+ 이름 : 권아름  나이 : 25  취미 : 음악감상 
+ 오늘 하루도 행복하세요...
+ 아이티윌 
+ 네이버 
+ 구글 
+
+body=soup.findAll('body')
+
+for i in body:
+    print(i.get_text())
+    
+
+ 환영합니다 
+ 이름 : 권아름  나이 : 25  취미 : 음악감상 
+ 오늘 하루도 행복하세요...
+ 아이티윌 
+ 네이버 
+ 구글
+
+
+soup.find('a')
+Out[114]: <a class="cafe1" href="http://itwill.co.kr" id="link1"> 아이티윌 </a>
+
+a=soup.find_all('a')
+
+for i in a:
+    print(i.get_text())
+    
+ 아이티윌 
+ 네이버 
+ 구글 
+
+a=soup.findAll('a')
+
+for i in a:
+    print(i.get_text())
+    
+ 아이티윌 
+ 네이버 
+ 구글
+
+
+a1=soup.findAll('a',{'class':'cafe1'})				같은 레벨의 a태그가 여러개 있을 경우 class 또는 id 속성을 통해서 찾기
+
+a1
+Out[128]: [<a class="cafe1" href="http://itwill.co.kr" id="link1"> 아이티윌 </a>]
+
+for i in a1:
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+http://itwill.co.kr
+ 아이티윌 
+
+a2=soup.findAll('a',{'class':'cafe2'})
+
+a2
+Out[131]: [<a class="cafe2" href="http://www.naver.com" id="link2"> 네이버 </a>]
+
+for i in a2:
+    print(i.get_text())
+    
+ 네이버 
+
+a3=soup.findAll('a',{'class':'cafe3'})
+
+a3
+Out[133]: [<a class="cafe3" href="http://www.google.com" id="link3"> 구글 </a>]
+
+for i in a3:
+    print(i.get_text())
+    
+ 구글
+
+
+a1=soup.find('a',{'class':'cafe1'})
+
+for i in a1:
+    print(i.get_text())					find에서는 get_text()를 쓸 수 없음
+    
+AttributeError: 'NavigableString' object has no attribute 'get_text'
+
+for i in a1:
+    print(i.string)					find를 쓸 때는 string를 사용해야함
+    
+ 아이티윌 
+
+for i in a1:
+    print(i.attrs['href'])				find에서는 attrs를 쓸 수 없음
+    print(i.string)
+
+AttributeError: 'NavigableString' object has no attribute 'attrs'
+
+
+a1=soup.findAll('a',{'id':'link1'})			id라는 속성을 이용해서 찾기
+
+for i in a1:
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+http://itwill.co.kr
+ 아이티윌 
+
+a2=soup.findAll('a',{'id':'link2'})
+
+for i in a2:
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+http://www.naver.com
+ 네이버 
+
+for i in soup.findAll('a',{'id':'link3'}):
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+http://www.google.com
+ 구글 
+
+
+soup.findAll(class='cafe1')
+                     ^
+SyntaxError: invalid syntax			오류남, class_ 꼭 해줘야함
+
+soup.findAll(class_='cafe1')
+Out[152]: [<a class="cafe1" href="http://itwill.co.kr" id="link1"> 아이티윌 </a>]
+
+for i in soup.findAll(class_='cafe1'):
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+http://itwill.co.kr
+ 아이티윌 
+
+for i in soup.findAll(id='link1'):		id는 _하면 안됨
+    print(i.attrs['href'])
+    print(i.get_text())
+    
+http://itwill.co.kr
+ 아이티윌
+
+
+for i in soup.findAll('a'):
+    print(i.get('href'))			href 속성의 값을 출력
+    
+http://itwill.co.kr
+http://www.naver.com
+http://www.google.com
+
+soup.findAll(['a','p'])				여러 태그를 동시에 보고자 할 때는 [] 사용
+Out[159]: 
+[<p align="center"> 환영합니다 </p>,
+ <p align="left"> 이름 : 권아름 <br/> 나이 : 25 <br/> 취미 : 음악감상 </p>,
+ <p align="right"> 오늘 하루도 행복하세요...</p>,
+ <a class="cafe1" href="http://itwill.co.kr" id="link1"> 아이티윌 </a>,
+ <a class="cafe2" href="http://www.naver.com" id="link2"> 네이버 </a>,
+ <a class="cafe3" href="http://www.google.com" id="link3"> 구글 </a>]
+
+for i in soup.findAll(['a','p']):
+    print(i.get_text())
+    
+ 환영합니다 
+ 이름 : 권아름  나이 : 25  취미 : 음악감상 
+ 오늘 하루도 행복하세요...
+ 아이티윌 
+ 네이버 
+ 구글 
+
+
+
+import urllib.request as req						BeautifulSoup은 다운로드 기능이 없어서 urllib.request사용
+
+url="http://www.weather.go.kr/weather/forecast/mid-term-rss3.jsp"
+
+res=req.urlopen(url)
+
+res
+Out[166]: <http.client.HTTPResponse at 0x8c278d0>
+
+soup=BeautifulSoup(res,'html.parser')
+
+soup.find('title').string
+Out[170]: '기상청 육상 중기예보'
+
+http://www.weather.go.kr/weather/forecast/mid-term-rss3.jsp
+인터넷 화면에서 오른쪽버튼 - 소스보기
+크롬으로 들어가면 자동으로 태그가 보임 (오른쪽 버튼 - 검사)
